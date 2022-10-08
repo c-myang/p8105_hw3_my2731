@@ -11,8 +11,7 @@ knitr::opts_chunk$set(
   warning = FALSE, 
   message = FALSE,
   fig.width = 6,
-  fig.asp = .6,
-  out.width = "90%")
+  fig.asp = 0.9)
 ```
 
 ## Problem 1: Instacart Data
@@ -27,7 +26,7 @@ instacart
 ```
 The dataset contains information about online grocery orders made through Instacart. There 1,384,617 observations of 15 variables, where each row in the dataset is a product from an order. Each order is associated with a unique order ID number and order ID. The variables `order_hour_of_day` and `order_dow` describe the time (hour of day and day of the week) orders were made. Each row also contains information about each product, such as `product_name`, `aisle`, and `department` of the product. The variable `reordered` indicates whether a product has been purchased by a user in the past, and `add_to_cart_order` indicates the order an item was placed in the cart.
 
-For example, for `order_id == 1`, we can see the order was made at 10AM on a Thursday, 4/8 products are reorders, and that most of the products came from the produce and dairy eggs department.
+For example, for `order_id == 1`, we can see the order was made at 10AM on a Thursday, 4 out of the 8 products are reorders, and that most of the products came from the produce and dairy eggs department.
 
 ## Data exploration
 
@@ -68,8 +67,13 @@ plot_aisles = aisles %>%
 plot_aisles
 ```
 
+Through the bar plot, we can confirm that for aisles with over 10,000 items ordered, the most popular aisles are fresh fruits and vegetables, and the least popular aisles are butter, oils and vinegars, and dry pasta.
+
+3. Popular items 
 
 Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
+
+4. Mean ordering times
 
 Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 

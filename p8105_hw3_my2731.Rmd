@@ -1,0 +1,14 @@
+---
+title: "P8105 Homework 3"
+output: github_document
+date: "October 15th, 2022"
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+## Problem 1: 
+
+### Cleaning the data

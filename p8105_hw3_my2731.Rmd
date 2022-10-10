@@ -7,6 +7,7 @@ date: "October 15th, 2022"
 ```{r setup, include = FALSE}
 library(tidyverse)
 library(p8105.datasets)
+library(lubridate)
 knitr::opts_chunk$set(
   warning = FALSE, 
   message = FALSE,
@@ -88,4 +89,39 @@ knitr::kable(pop_items)
 4. Mean ordering times
 
 Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+
+## Problem 2: Accelerometer Data
+
+### Clean and load data
+
+In this problem, we will load, clean, and tidy the `accel_data.csv` dataset, which contains five weeks of accelerometer data collected on a 63 year-old male with BMI 25, admitted to the Advanced Cardiac Care Center of Columbia University Medical Center and diagnosed with congestive heart failure (CHF). 
+
+We will apply snake case to all the variables, add a logical `weekend` variable that is `TRUE` if `day == c("Saturday", "Sunday")` and `FALSE` otherwise. 
+
+```{r accel_data}
+accel_data =
+  read_csv("./data/accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    weekend = ifelse(day == "Saturday" | day == "Sunday", TRUE, FALSE)) %>% 
+  relocate(weekend, .after = day)
+
+accel_data
+```
+
+The dataset contains 35 observations of 1444 variables, where each row describes the activity counts for all minutes of each day. The weekday of observation is indicated by `day`, and has a unique `day_id`. `week` indicates the week of observation, and the `weekend` indicates whether observation falls on a weekend. The variables `activity_*` are the activity counts for all 1440 minutes of a 24-hour day, starting at midnight.
+
+### Aggregate across minutes
+
+Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+
+```{r aggregate}
+accel_data = accel_data %>%
+  mutate(total_activity = rowSums(across(activity_1:activity_1440))) %>% 
+  relocate(total_activity, .after = weekend) 
+
+accel_data %>% 
+  select(week:total_activity) %>% 
+  knitr::kable()
+```
 

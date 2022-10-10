@@ -7,7 +7,6 @@ date: "October 15th, 2022"
 ```{r setup, include = FALSE}
 library(tidyverse)
 library(p8105.datasets)
-library(lubridate)
 knitr::opts_chunk$set(
   warning = FALSE, 
   message = FALSE,
@@ -95,14 +94,16 @@ Make a table showing the mean hour of the day at which Pink Lady Apples and Coff
 
 In this problem, we will load, clean, and tidy the `accel_data.csv` dataset, which contains five weeks of accelerometer data collected on a 63 year-old male with BMI 25, admitted to the Advanced Cardiac Care Center of Columbia University Medical Center and diagnosed with congestive heart failure (CHF). 
 
-We will apply snake case to all the variables, add a logical `weekend` variable that is `TRUE` if `day == c("Saturday", "Sunday")` and `FALSE` otherwise. 
+We will apply snake case to all the variables, categorize and re-level the `day` variable according to the days of the week, and add a logical `weekend` variable that is `TRUE` if `day == c("Saturday", "Sunday")` and `FALSE` otherwise. 
 
 ```{r accel_data}
 accel_data =
   read_csv("./data/accel_data.csv") %>% 
   janitor::clean_names() %>% 
   mutate(
-    weekend = ifelse(day == "Saturday" | day == "Sunday", TRUE, FALSE)) %>% 
+    weekend = ifelse(day == "Saturday" | day == "Sunday", TRUE, FALSE),
+    day = factor(day, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", 
+                                 "Thursday", "Friday", "Saturday"))) %>% 
   relocate(weekend, .after = day)
 
 accel_data
@@ -148,7 +149,7 @@ Based on this data, we can plot the mean 24-hour activity time course, according
 ```{r activity_plot}
 activity_plot = daily_activity %>% 
   ggplot(aes(x = minute, y = mean_activity, color = day)) + 
-  geom_point(alpha = 0.2) + 
+  geom_point(alpha = 0.1) + 
   geom_smooth(se = FALSE) + 
   labs(
     x = "Minute",

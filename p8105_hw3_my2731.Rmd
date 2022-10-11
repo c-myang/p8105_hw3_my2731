@@ -7,6 +7,7 @@ date: "October 15th, 2022"
 ```{r setup, include = FALSE}
 library(tidyverse)
 library(p8105.datasets)
+library(patchwork)
 knitr::opts_chunk$set(
   warning = FALSE, 
   message = FALSE,
@@ -171,7 +172,7 @@ Based on the graph, we can see that daily activity is lowest in the first 250 mi
 
 ### Clean and load data
 
-```{r}
+```{r load_noaa}
 data("ny_noaa")
 
 ny_noaa
@@ -185,19 +186,64 @@ ny_noaa %>%
 ```
 Under each column, we can see that a significant proportion of weather data points are missing, especially for `tmax` and `tmin`, where almost half of the observations have missing values.
 
+Next, we will clean the data. We will separate variables for year, month, and day, and we will convert the units of `prcp`, `tmax`, and `tmin` from tenths of a unit to mm and Celsius, respectively.
+
 ```{r noaa_clean}
 noaa_clean = ny_noaa %>% 
   separate(date, into = c("year", "month", "day"), sep = "-") %>% 
   mutate(
     year = as.numeric(year),
     month = month.name[as.numeric(month)],
-    day = as.numeric(day))
+    day = as.numeric(day),
+    prcp = prcp*0.1,
+    tmax = as.numeric(tmax)*0.1,
+    tmin = as.numeric(tmin)*0.1
+  )
+
+noaa_clean
+
+noaa_clean %>% 
+  group_by(snow) %>% 
+  summarise(n_obs = n()) %>% 
+  arrange(desc(n_obs))
 ```
 
+For snowfall, the most commonly observed values are `0`, `NA`, and `25`, respectively. Intuitively, this is reasonable because snow does not fall year-round and therefore, most days of the year would observe 0 snowfall.
 
-Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
+### Plotting average max temperature
 
 Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+
+```{r noaa_plots}
+temp_jan = noaa_clean %>% 
+  group_by(month, year) %>% 
+  summarise(mean_tmax = mean(tmax, na.rm = TRUE)) %>% 
+  filter(month == "January") %>% 
+  ggplot(aes(x = year, y = mean_tmax)) + 
+  geom_line() + 
+  labs(
+    x = "Year",
+    y = "Mean max temperature (C)",
+    title = "Average max temperature in January, 1981 to 2010",
+    caption = "Data come from the noaa package"
+  )
+
+temp_jul = noaa_clean %>% 
+  group_by(month, year) %>% 
+  summarise(mean_tmax = mean(tmax, na.rm = TRUE)) %>% 
+  filter(month == "July") %>% 
+  ggplot(aes(x = year, y = mean_tmax)) + 
+  geom_line() + 
+  labs(
+    x = "Year",
+    y = "Mean max temperature (C)",
+    title = "Average max temperature in July, 1981 to 2010",
+    caption = "Data come from the noaa package"
+  )
+
+temp_jan + temp_jul
+```
+
 
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 

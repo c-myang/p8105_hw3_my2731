@@ -179,6 +179,7 @@ data("ny_noaa")
 
 ny_noaa
 ```
+
 The `ny_noaa` dataset contains weather data from NY state weather stations between January 1, 1981 and December 31, 2010. It contains `r nrow(ny_noaa)` observations of `r ncol(ny_noaa)` variables. Key identifiers include the `id` of the station name and `date`. The weather data includes the amount of precipitation (in tenths of mm), snowfall (in mm), snow depth (mm), and max and min temperatures (in tenths of C). We can note significant amounts of missing data:
 
 ```{r nmiss}

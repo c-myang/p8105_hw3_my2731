@@ -214,7 +214,7 @@ For snowfall, the most commonly observed values are `0`, `NA`, and `25`, respect
 
 Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
 
-```{r noaa_plots}
+```{r tmax_plots}
 temp_jan = noaa_clean %>% 
   group_by(month, year) %>% 
   summarise(mean_tmax = mean(tmax, na.rm = TRUE)) %>% 
@@ -223,7 +223,7 @@ temp_jan = noaa_clean %>%
   geom_line() + 
   labs(
     x = "Year",
-    y = "Mean max temperature (C)",
+    y = "Mean max temperature (°C)",
     title = "Average max temperature in January, 1981 to 2010",
     caption = "Data come from the noaa package"
   )
@@ -236,7 +236,7 @@ temp_jul = noaa_clean %>%
   geom_line() + 
   labs(
     x = "Year",
-    y = "Mean max temperature (C)",
+    y = "Mean max temperature (°C)",
     title = "Average max temperature in July, 1981 to 2010",
     caption = "Data come from the noaa package"
   )
@@ -246,4 +246,32 @@ temp_jan + temp_jul
 
 
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
+
+```{r tmaxmin_plots}
+tmax_tmin_p = noaa_clean %>% 
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_hex() + 
+  labs(
+    x = "Minimum temperature (°C)",
+    y = "Max temperature (°C)",
+    title = "Hexagon density plot of daily minimum and maximum temperature (°C) in New York, 1981-2010",
+    caption = "Data come from the noaa package"
+  ) + 
+  viridis::scale_fill_viridis(name = "", option = "plasma")
+
+snowfall_p = noaa_clean %>% 
+  filter(snow >= 0 | snow <= 100) %>% 
+  group_by(year) %>% 
+  summarise(mean_snow = mean(snow)) %>% 
+  ggplot(aes(x = year, y = mean_snow)) + 
+  geom_line() +
+  labs(
+    x = "Year",
+    y = "Snowfall (mm)",
+    title = "Distribution of snowfall in New York, 1981 to 2010",
+    caption = "Data come from the noaa package"
+  )
+
+tmax_tmin_p + snowfall_p
+```
 

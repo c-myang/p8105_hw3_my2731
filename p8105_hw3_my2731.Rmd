@@ -24,7 +24,7 @@ We will be working with the “The Instacart Online Grocery Shopping Dataset 201
 ```{r dataload}
 data("instacart")
 
-instacart
+instacart 
 ```
 The dataset contains information about online grocery orders made through Instacart. There 1,384,617 observations of 15 variables, where each row in the dataset is a product from an order. Each order is associated with a unique order ID number and order ID. The variables `order_hour_of_day` and `order_dow` describe the time (hour of day and day of the week) orders were made. Each row also contains information about each product, such as `product_name`, `aisle`, and `department` of the product. The variable `reordered` indicates whether a product has been purchased by a user in the past, and `add_to_cart_order` indicates the order an item was placed in the cart.
 
@@ -42,8 +42,7 @@ Using `group_by`, and `summarise`, we can determine the number of aisles, and th
 aisles = instacart %>% 
   group_by(aisle_id, aisle) %>% 
   summarise(
-    n_obs = n()
-  ) %>% 
+    n_obs = n()) %>% 
   arrange(desc(n_obs))
 
 aisles
@@ -57,7 +56,7 @@ There are `r nrow(aisles)` different aisles. The most popular aisles customers o
 plot_aisles = aisles %>% 
   filter(n_obs >= 10000) %>% 
   ggplot(aes(x = reorder(aisle, n_obs), y = n_obs)) +
-  geom_bar(stat = "identity") + 
+  geom_bar(stat = "identity", fill = "forestgreen") + 
   coord_flip() +
   labs(
     title = "Number of Instacart items ordered by aisle",
@@ -81,15 +80,32 @@ pop_items = instacart %>%
   group_by(aisle, product_name) %>% 
   summarise(n_obs = n()) %>% 
   arrange(desc(n_obs),.by_group = TRUE) %>% 
-  slice(1)
+  slice(1) %>% 
+  arrange(desc(n_obs)) %>% 
+  rename("Aisle" = aisle,
+         "Product name" = product_name,
+         "# of orders" = n_obs)
 
 knitr::kable(pop_items)
 ```
 
-
 4. Mean ordering times
 
-Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+Using `pivot_wider`, we can create a table showing the mean hour (scaled to a 24-hour day) at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week. 
+
+```{r}
+instacart %>% 
+  filter(product_name == c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
+  group_by(product_name, order_dow) %>% 
+  summarise(avg_hour = round(mean(order_hour_of_day), 2)) %>% 
+  pivot_wider(product_name, 
+              names_from = order_dow,
+              values_from = avg_hour) %>% 
+  knitr::kable(col.names = c("Product name", "Sunday", "Monday", "Tuesday", "Wednesday",
+                             "Thursday", "Friday", "Saturday"))
+```
+
+Based on the table, Coffee Ice Cream is usually ordered in the early afternoon for every day of the week while Pink Lady Apples range from being ordered, on average, after 11am and after 2pm.
 
 ## Problem 2: Accelerometer Data
 
@@ -144,7 +160,6 @@ daily_activity = accel_data %>%
   mutate(minute = as.numeric(minute)) %>% 
   group_by(day, minute) %>% 
   summarise(mean_activity = mean(activity))
-
 ```
 
 Based on this data, we can plot the mean 24-hour activity time course, according to the day of the week.
@@ -152,7 +167,7 @@ Based on this data, we can plot the mean 24-hour activity time course, according
 ```{r activity_plot}
 activity_plot = daily_activity %>% 
   ggplot(aes(x = minute, y = mean_activity, color = day)) + 
-  geom_point(alpha = 0.1) + 
+  geom_point(alpha = 0.1, size = 0.8) + 
   geom_smooth(se = FALSE) + 
   labs(
     x = "Minute",
@@ -220,6 +235,8 @@ For snowfall, the most commonly observed values are `0`, `NA`, and `25`, respect
 
 Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
 
+The resulting plots show the average maximum daily temperature in January and July from 1981-2010. The average max temperature in Jaunary tends to fluctuate around zero degrees Celsius, while the temperature for July varies around 27 degrees Celsius. We can see slight similarities in the variation In addition, the average maximum temperature for January appears to have more variation compared to that of July.
+
 ```{r jan and july temp plots}
 janjul_p = noaa_clean %>% 
   group_by(month, year) %>% 
@@ -246,12 +263,11 @@ tmax_tmin_p = noaa_clean %>%
   geom_hex() + 
   labs(
     x = "Minimum temperature (°C)",
-    y = "Max temperature (°C)",
-    title = "Density of daily minimum vs. maximum temperature in New York, 1981-2010",
-    caption = "Data come from the rnoaa package"
+    y = "Maximum temperature (°C)",
+    title = "Density of daily minimum vs. maximum temperature (°C)",
   ) + 
   theme(legend.key.width = unit(0.5, "in"),
-        plot.title = element_text(size = 10)) +
+        plot.title = element_text(size = 11)) +
   viridis::scale_fill_viridis(name = "", option = "plasma")
 
 snowfall_p = noaa_clean %>% 
@@ -261,15 +277,18 @@ snowfall_p = noaa_clean %>%
   labs(
     x = "Snowfall (mm)",
     y = "Density",
-    title = "Density distribution of snowfall in New York, 1981-2010",
+    title = "Density of daily snowfall (mm)",
     colour = "Year",
-    caption = "Data come from the rnoaa package"
   ) + 
-  theme(legend.text = element_text(size = 5), 
-        legend.key.size = unit(0.1, "in"),
-        plot.title = element_text(size = 10)) + 
+  theme(legend.text = element_text(size = 6), 
+        legend.key.size = unit(0.15, "in"),
+        plot.title = element_text(size = 11)) + 
   viridis::scale_colour_viridis(discrete = TRUE, option = "plasma")
 
-tmax_tmin_p + snowfall_p
+weather_plots = tmax_tmin_p + snowfall_p
+
+wrap_elements(weather_plots) + 
+  ggtitle("Density distributions of min vs. max temperature and snowfall in New York State, 1981-2010") +
+  labs(caption = "Data come from the rnoaa package")
 ```
 

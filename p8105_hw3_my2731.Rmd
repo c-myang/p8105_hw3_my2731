@@ -141,6 +141,11 @@ accel_data = accel_data %>%
 
 accel_data %>% 
   select(week:total_activity) %>% 
+  rename("Week" = week,
+         "Day ID" = day_id,
+         "Day" = day,
+         "Weekend" = weekend,
+         "Total Activity" = total_activity) %>% 
   knitr::kable()
 ```
 
@@ -225,7 +230,11 @@ ny_noaa
 ny_noaa %>% 
   group_by(snow) %>% 
   summarise(n_obs = n()) %>% 
-  arrange(desc(n_obs))
+  arrange(desc(n_obs)) %>% 
+  head(5) %>% 
+  rename("Snowfall (mm)" = snow,
+         "# observations" = n_obs) %>% 
+  knitr::kable()
 ```
 
 For snowfall, the most commonly observed values are `0`, `NA`, and `25`, respectively. Intuitively, this is reasonable because snow does not fall year-round and therefore, most days of the year would observe 0mm of snowfall.
@@ -248,10 +257,10 @@ janjul_p = ny_noaa %>%
     caption = "Data come from the rnoaa package"
   ) + 
   viridis::scale_color_viridis(discrete = TRUE) + 
-  theme(legend.key.height = unit(0.02, "in"),
-        legend.key.width = unit(0.07, "in"), 
-        legend.text = element_text(size = 2)) + 
-  guides(col = guide_legend(ncol = 20)) +
+  theme(legend.key.height = unit(0.05, "in"),
+        legend.key.width = unit(0.1, "in"), 
+        legend.text = element_text(size = 4)) + 
+  guides(col = guide_legend(ncol = 25)) +
   facet_grid(. ~ month, scales = "free") 
 
 janjul_p
@@ -289,6 +298,7 @@ snowfall_p = ny_noaa %>%
   theme(legend.text = element_text(size = 6), 
         legend.key.size = unit(0.15, "in"),
         plot.title = element_text(size = 11)) + 
+  guides(col = guide_legend(ncol = 6)) +
   viridis::scale_colour_viridis(discrete = TRUE, option = "plasma")
 
 weather_plots = tmax_tmin_p + snowfall_p

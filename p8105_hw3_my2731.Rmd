@@ -130,26 +130,27 @@ accel_data
 
 The dataset contains `r nrow(accel_data)` observations of `r ncol(accel_data)` variables, where each row describes the activity counts for all minutes of each day. The weekday of observation is indicated by `day`, and has a unique `day_id`. `week` indicates the week of observation, and the `weekend` indicates whether observation falls on a weekend. The variables `activity_*` are the activity counts for all 1440 minutes of a 24-hour day, starting at midnight.
 
+Notably, we can see that many `activity_*` values take on a value of `1`. This may be indicative of a null or missing value, or no recorded activity for a given minute. Since we do not have any further information about the accelerometer data, we will leave these values as is.
+
 ### Aggregate across minutes
 
-Using `rowSums` and `across` within the `mutate` function, we can compute the sum across minutes for each day to get the total activity over the day. 
+Using `rowSums` and `across` within the `mutate` function, we can compute the total activity over the day. 
 
 ```{r aggregate}
-accel_data = accel_data %>%
+total_act = accel_data %>%
   mutate(total_activity = rowSums(across(activity_1:activity_1440))) %>% 
-  relocate(total_activity, .after = weekend) 
+  arrange(day) %>% 
+  group_by(day, week) %>% 
+  pivot_wider(week,
+              names_from = day,
+              values_from = total_activity)
 
-accel_data %>% 
-  select(week:total_activity) %>% 
-  rename("Week" = week,
-         "Day ID" = day_id,
-         "Day" = day,
-         "Weekend" = weekend,
-         "Total Activity" = total_activity) %>% 
-  knitr::kable()
+total_act %>% 
+  rename("Week" = week) %>% 
+  knitr::kable(caption = "Total accelerometer activity by day over a 5-week observation period")
 ```
 
-The table above shows the totals for each day. From first glance, we see that the total activity is higher on weekends compared to the weekdays. We can also see that as the weeks progress, activity levels appear to slightly decrease.
+The table above shows the total activity for each day, by week. From first glance, we see that the total activity is higher on Friday and weekends compared to the weekdays. We can also see that as the weeks progress, activity levels appear to slightly decrease. For weeks 4 and 5 on Saturday, the total activity level is 1440, which may be indicative of no accelerometer data being recorded on these two days. 
 
 ### Plotting activity through the day
 
@@ -172,8 +173,8 @@ Based on this data, we can plot the mean 24-hour activity time course for each d
 ```{r activity_plot}
 activity_plot = daily_activity %>% 
   ggplot(aes(x = minute, y = mean_activity, color = day)) + 
-  geom_point(alpha = 0.1, size = 0.8) + 
-  geom_smooth(se = FALSE) + 
+  geom_line(alpha = 0.2, size = 0.3) +  
+  geom_smooth(se = FALSE, size = 0.5) +
   labs(
     x = "Minute",
     y = "Mean activity",
@@ -257,10 +258,10 @@ janjul_p = ny_noaa %>%
     caption = "Data come from the rnoaa package"
   ) + 
   viridis::scale_color_viridis(discrete = TRUE) + 
-  theme(legend.key.height = unit(0.05, "in"),
-        legend.key.width = unit(0.1, "in"), 
-        legend.text = element_text(size = 4)) + 
-  guides(col = guide_legend(ncol = 25)) +
+  theme(legend.key.height = unit(0.1, "in"),
+        legend.key.width = unit(0.2, "in"), 
+        legend.text = element_text(size = 5)) + 
+  guides(col = guide_legend(ncol = 30)) +
   facet_grid(. ~ month, scales = "free") 
 
 janjul_p

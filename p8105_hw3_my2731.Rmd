@@ -72,7 +72,7 @@ Through the bar plot, we can confirm that for aisles with over 10,000 items orde
 
 3. Popular items 
 
-Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
+Next we want to know the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. We will include the number of times each item is ordered the resulting table.
 
 ```{r popular items}
 pop_items = instacart %>% 
@@ -113,7 +113,7 @@ Based on the table, Coffee Ice Cream is usually ordered in the early afternoon f
 
 In this problem, we will load, clean, and tidy the `accel_data.csv` dataset, which contains five weeks of accelerometer data collected on a 63 year-old male with BMI 25, admitted to the Advanced Cardiac Care Center of Columbia University Medical Center and diagnosed with congestive heart failure (CHF). 
 
-We will apply snake case to all the variables, categorize and re-level the `day` variable according to the days of the week, and add a logical `weekend` variable that is `TRUE` if `day == c("Saturday", "Sunday")` and `FALSE` otherwise. We will then use `pivot_longer` to consolidate  all `activity_*` columns into unique observations.
+We will apply snake case to all the variables, categorize and re-level the `day` variable according to the days of the week, and add a logical `weekend` variable that is `TRUE` if `day == "Saturday" or "Sunday"` and `FALSE` otherwise. We will then use `pivot_longer` to consolidate  all `activity_*` columns into unique observations.
 
 ```{r accel_data}
 accel_data =
@@ -134,7 +134,7 @@ accel_data =
 accel_data
 ```
 
-The dataset contains `r nrow(accel_data)` observations of `r ncol(accel_data)` variables, where each row describes the activity count for each minute of each 24-hour day, starting at midnight.. The weekday of observation is indicated by `day`, and has a unique `day_id`. `week` indicates the week of observation, and the `weekend` indicates whether observation falls on a weekend. 
+The dataset contains `r nrow(accel_data)` observations of `r ncol(accel_data)` variables, where each row describes the activity count for each minute of each 24-hour day, starting at midnight. The weekday of observation is indicated by `day`, and has a unique `day_id`. The `week` variable indicates the week of observation, and the `weekend` is a logical variable which indicates whether observation falls on a weekend. 
 
 Notably, we can see that many `activity` values take on a value of `1`. This may be indicative of a null or missing value, or no recorded activity for a given minute. Since we do not have any further information about the accelerometer data, we will leave these values as is.
 
@@ -156,6 +156,7 @@ total_act %>%
   knitr::kable(caption = "Total accelerometer activity by day over a 5-week observation period")
 ```
 
+
 The table above shows the total activity for each day, by week. From first glance, we see that the total activity is higher on Friday and weekends compared to the weekdays. We can also see that as the weeks progress, activity levels appear to slightly decrease. For weeks 4 and 5 on Saturday, the total activity level is 1440, which may be indicative of no accelerometer data being recorded on these two days. 
 
 ### Plotting activity through the day
@@ -176,12 +177,12 @@ Based on this data, we can plot the mean 24-hour activity time course for each d
 activity_plot = daily_activity %>% 
   ggplot(aes(x = minute, y = mean_activity, color = day)) + 
   geom_line(alpha = 0.2, size = 0.3) +  
-  geom_smooth(se = FALSE, size = 0.5) +
+  geom_smooth(se = FALSE, size = 0.6) +
   labs(
     x = "Minute",
     y = "Mean activity",
-    title = "Mean daily accelerometer activity by day of the week",
-    caption = "Data come from the accel_data.csv dataset",
+    title = "Time course of average daily accelerometer activity, by day of the week",
+    caption = "Minute 0 corresponds to midnight. Data come from the accel_data.csv dataset",
     color = "Day"
   ) + 
   scale_x_continuous(limits = c(0, 1400)) + 
@@ -191,7 +192,7 @@ activity_plot = daily_activity %>%
 activity_plot
 ```
 
-Based on the graph, we can see that daily activity is lowest in the first 250 minutes of the day, and begins to increase and peak by mid-day. This is reflective of the individual being asleep from midnight until the morning. There is also a second peak of activity in the latter quarter of the day. The days of the week with the most activity appear to be on Friday evening and night, and Sunday mid-day. 
+Based on the graph, we can see that daily activity is lowest in the first 250 minutes of the day, and begins to increase and peak by mid-day. This is reflective of the individual being asleep from midnight until the morning. There is also a second peak of activity in the latter quarter of the day, corresponding to evening/nighttime activities. The days of the week with the most activity appear to be on Friday evening and night, and Sunday mid-day. 
 
 ## Problem 3: NOAA Data
 
@@ -202,7 +203,7 @@ data("ny_noaa")
 ny_noaa
 ```
 
-The `ny_noaa` dataset contains weather data from NY state weather stations between January 1, 1981 and December 31, 2010. It contains `r nrow(ny_noaa)` observations of `r ncol(ny_noaa)` variables. Key identifiers include the `id` of the station name and `date`. The weather data includes the amount of precipitation (in tenths of mm), snowfall (in mm), snow depth (mm), and max and min temperatures (in tenths of C). We can note significant amounts of missing data:
+The `ny_noaa` dataset contains weather data from NY state weather stations between January 1, 1981 and December 31, 2010. It contains `r nrow(ny_noaa)` observations of `r ncol(ny_noaa)` variables. Key identifiers include the `id` of the station name and `date`. The weather data includes the amount of precipitation (in tenths of mm), snowfall (in mm), snow depth (mm), and max and min temperatures (in tenths of °C). We can note significant amounts of missing data:
 
 ```{r nmiss}
 missing_noaa = ny_noaa %>% 
@@ -240,7 +241,7 @@ ny_noaa %>%
   knitr::kable()
 ```
 
-For snowfall, the most commonly observed values are `0`, `NA`, and `25`, respectively. Intuitively, this is reasonable because snow does not fall year-round and therefore, most days of the year would observe 0mm of snowfall.
+For snowfall, the most commonly observed values are `0`, `NA`, and `25`, respectively. Intuitively, this is reasonable because snow does not fall year-round and therefore, most days of the year would observe 0 mm of snowfall.
 
 ### Plotting average max temperature
 
@@ -266,7 +267,7 @@ janjul_p = ny_noaa %>%
 janjul_p
 ```
 
-The resulting plots show the average maximum daily temperature in January and July from 1981-2010. The average max temperature in Jaunary tends to fluctuate around 0 degrees Celsius, while the temperature for July varies around 27 degrees Celsius. In addition, the average maximum temperature for July appears to have more variation compared to that of January.
+The resulting plots show the average maximum daily temperature in January and July from 1981-2010, where each line represents temperature readings for each weather station (legend omitted). The average maximum temperature in January tends to fluctuate around 0 degrees Celsius, while the temperature for July varies around 27 degrees Celsius. In addition, the average maximum temperature for January appears to have more variation compared to that of July. The maximum temperature across stations tends to fluctuate similarly year to year, with very few outliers (e.g. 13 °C in July 1987).
 
 ### Plotting min vs. max temperature and snowfall
 
@@ -310,4 +311,4 @@ wrap_elements(weather_plots) +
 
 The result is density plot of snowfall (mm) from 1981 to 2010, for observations with snowfall greater than 0mm and less than 100mm, and a hexagon density plot of the daily minimum and maximum temperature for all observations. 
 
-For the snowfall plot, we can see that the height of the peaks are decreasing year over year, indicative of rising temperatures which are resulting in less snowfall. Meanwhile, for the temperature hexagon density plot, we can see that low daily minimum temperatures correspond to lower daily maximum temperatures, and the same goes for high temperatures. There appears to be outliers where a minimum temperature of approximately -30°C corresponds to a maximum temperature of 60°C, and where minimum and maximum daily temperature both sit at 60°C. These outliers may be indicative of measurement error and should be verified to ensure they are valid data points.
+For the snowfall plot, we can see that the height of the peaks are decreasing year over year, indicative of rising temperatures which are resulting in less snowfall. Meanwhile, for the temperature hexagon density plot, we can see that low daily minimum temperatures correspond to lower daily maximum temperatures, and the same goes for high temperatures. There appear to be some outliers in a plot, for instance, where a minimum temperature of approximately -30°C corresponds to a maximum temperature of 60°C, and where minimum and maximum daily temperature both sit at 60°C. These outliers may be indicative of measurement error and should be verified to ensure they are valid data points.
